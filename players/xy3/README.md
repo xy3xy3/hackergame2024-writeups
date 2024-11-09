@@ -5,7 +5,7 @@
 
 pass=true
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image.png)
 
 flag{w3!cOme-To-HAcKErG4Me-@nd-3nJoy-H4CKInG-Z0Z4}
 
@@ -17,7 +17,7 @@ flag{w3!cOme-To-HAcKErG4Me-@nd-3nJoy-H4CKInG-Z0Z4}
 
 搜索flag，发现很多atobbase64解码
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 1.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 1.png)
 
 atob("ZmxhZ3swa18xNzVfYV9oMWRkM25fczNjM3J0X2YxNGdfX19wbGVhc2Vfam9pbl91c191c3RjX25lYnVsYV9hbkRfdHdvX21hSm9yX3JlcXVpcmVtZW50c19hUmVfc2hvd25fc29tZXdoZXJlX2Vsc2V9")
 
@@ -67,17 +67,17 @@ flag1:flag{a_9OOd_©ΛT_Is_ThE_cαt_ωho_c@И_PA5s_tHE_QU!Z}
 
 3. Hackergame 2018 让哪个热门检索词成为了科大图书馆当月热搜第一？**（20 分）**
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 2.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 2.png)
 
 程序员的自我修养
 
 4. 在今年的 USENIX Security 学术会议上中国科学技术大学发表了一篇关于电子邮件伪造攻击的论文，在论文中作者提出了 6 种攻击方法，并在多少个电子邮件服务提供商及客户端的组合上进行了实验？**（10 分）**
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 3.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 3.png)
 
 [https://www.usenix.org/system/files/usenixsecurity24-ma-jinrui.pdf](https://www.usenix.org/system/files/usenixsecurity24-ma-jinrui.pdf)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 4.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 4.png)
 
 336
 
@@ -99,9 +99,9 @@ flag1:flag{a_9OOd_©ΛT_Is_ThE_cαt_ωho_c@И_PA5s_tHE_QU!Z}
 
 试了几次不对，大概在1854，开爆破
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 5.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 5.png)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 6.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 6.png)
 
 1833
 
@@ -111,9 +111,9 @@ flag{t3И_¥e@Я$_ØF_hΛ©kEЯGΛme_OMEd3tOบ_W!Th_И3k0_quIZ}
 
 [https://www.viewstl.com/#!](https://www.viewstl.com/#!)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 7.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 7.png)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 8.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 8.png)
 
 ```Plain Text
 flag{Dr4W_Us!nG_fR3E_C4D!!w0W}
@@ -121,9 +121,9 @@ flag{Dr4W_Us!nG_fR3E_C4D!!w0W}
 
 # 每日论文太多了！
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 9.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 9.png)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 10.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 10.png)
 
 ```Plain Text
 flag{h4PpY_hAck1ng_3veRyd4y}
@@ -181,7 +181,7 @@ fetchAndSubmit();
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 11.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 11.png)
 
 flag{!-@m-tH3-hAck3R-K1nG-0f-CoMp@RiN9-nUm6eR$-zOz4}
 
@@ -201,13 +201,13 @@ flag{!-@m-tH3-hAck3R-K1nG-0f-CoMp@RiN9-nUm6eR$-zOz4}
 
 20240519
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 12.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 12.png)
 
 `flag{5UB5CR1B3_T0_L30_CH4N_0N_B1L1B1L1_PLZ_98794d67e7}`
 
 ## 诶？我带 LEO 酱出去玩？真的假的？
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 13.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 13.png)
 
 六安国材
 
@@ -215,7 +215,7 @@ flag{!-@m-tH3-hAck3R-K1nG-0f-CoMp@RiN9-nUm6eR$-zOz4}
 
 六安市中央森林公园
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 14.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 14.png)
 
 [https://baike.baidu.com/item/%E4%B8%89%E5%B3%A1%E6%88%AA%E6%B5%81%E7%9F%B3/16268005](https://baike.baidu.com/item/%E4%B8%89%E5%B3%A1%E6%88%AA%E6%B5%81%E7%9F%B3/16268005)
 
@@ -231,7 +231,7 @@ flag{D3T41LS_M4TT3R_1F_R3V3RS3_S34RCH_1S_1MP0SS1BL3_8cb69a32c8}
 
 ## 尤其是你才是最该多练习的人
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 15.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 15.png)
 
 [https://baike.baidu.com/item/%E5%92%8C%E8%B0%90%E5%8F%B7CRH6%E5%9E%8B%E7%94%B5%E5%8A%9B%E5%8A%A8%E8%BD%A6%E7%BB%84](https://baike.baidu.com/item/%E5%92%8C%E8%B0%90%E5%8F%B7CRH6%E5%9E%8B%E7%94%B5%E5%8A%9B%E5%8A%A8%E8%BD%A6%E7%BB%84)
 
@@ -249,9 +249,9 @@ flag{D3T41LS_M4TT3R_1F_R3V3RS3_S34RCH_1S_1MP0SS1BL3_8cb69a32c8}
 
 CRH6F-A
 
-![ea766100410a0a052f3435e291caed8.jpg](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/ea766100410a0a052f3435e291caed8.jpg)
+![ea766100410a0a052f3435e291caed8.jpg](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/ea766100410a0a052f3435e291caed8.jpg)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 16.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 16.png)
 
 # Node.js is Web Scale
 
@@ -297,7 +297,7 @@ CRH6F-A
 
 flag{n0_pr0topOIl_50_U5E_new_Map_1n5teAD_Of_0bject2kv_dabcbb565a}
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 17.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 17.png)
 
 # PaoluGPT
 
@@ -305,7 +305,7 @@ flag{n0_pr0topOIl_50_U5E_new_Map_1n5teAD_Of_0bject2kv_dabcbb565a}
 
 ' OR contents LIKE '%flag%' --
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 18.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 18.png)
 
 flag{zU1_xiA0_de_11m_Pa0lule!!!_c2ecac9c0b}
 
@@ -313,7 +313,7 @@ flag{zU1_xiA0_de_11m_Pa0lule!!!_c2ecac9c0b}
 
 ' OR (id!='bffd8d8f-367b-4ee7-88c7-de324c03fcf0' and contents LIKE '%flag%') --
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 19.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 19.png)
 
 flag{enJ0y_y0uR_Sq1_&_1_would_xiaZHOU_hUI_guo_fe5b26d3aa}
 
@@ -373,7 +373,7 @@ for i in range(num_tests):
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 20.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 20.png)
 
 flag{p0werful_r3gular_expressi0n_easy_c2bb3184bb}
 
@@ -383,7 +383,7 @@ flag{p0werful_r3gular_expressi0n_easy_c2bb3184bb}
 
 [https://s3.boskent.com/divisibility-regex/divisibility-regex.html](https://s3.boskent.com/divisibility-regex/divisibility-regex.html)
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 21.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 21.png)
 
 # 惜字如金 3
 
@@ -493,7 +493,7 @@ def post() -> flask.Response:
 
 剩下几行自己改，llm有些变量搞错了
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 22.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 22.png)
 
 ## 2
 
@@ -600,7 +600,7 @@ def post() -> flask.Response:
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 23.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 23.png)
 
 自己改
 
@@ -608,7 +608,7 @@ def post() -> flask.Response:
 
 下面几行可以用上一题的解决，想办法找到第7行
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 24.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 24.png)
 
 似乎只知道爆破（），想不到数学方法
 
@@ -628,7 +628,7 @@ x*(1-x)*(4-2*x+2*x*x)/(1+x*x)
 
 [https://www.wolframalpha.com/input?i2d=true&i=Integrate%5BDivide%5BPower%5Bx%2C4%5D+%5C%2840%29a%2BbSquare%5Bx%5D%5C%2841%29%2C1%2BPower%5Bx%2C2%5D%5D%2C%7Bx%2C0%2C1%7D%5D](https://www.wolframalpha.com/input?i2d=true&i=Integrate%5BDivide%5BPower%5Bx%2C4%5D+%5C%2840%29a%2BbSquare%5Bx%5D%5C%2841%29%2C1%2BPower%5Bx%2C2%5D%5D%2C%7Bx%2C0%2C1%7D%5D)
 
-![15d48fb000949fe8c47b637b8017adb.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/15d48fb000949fe8c47b637b8017adb.png)
+![15d48fb000949fe8c47b637b8017adb.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/15d48fb000949fe8c47b637b8017adb.png)
 
 ## 2
 
@@ -849,7 +849,7 @@ if __name__ == "__main__":
 
 flag{y0u_ar3_7he_Ramanujan_0f_in3quality_6297b177c6}
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 25.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 25.png)
 
 
 
@@ -970,7 +970,7 @@ else:
 p.close()
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 26.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 26.png)
 
 ## medium
 
@@ -1090,7 +1090,7 @@ else:
 p.close()
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 27.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 27.png)
 
 ## hard
 
@@ -1223,7 +1223,7 @@ else:
 p.close()
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 28.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 28.png)
 
 
 
@@ -1330,13 +1330,13 @@ if __name__ == "__main__":
 
 flag{uno!!!!_esrever_now_U_run_MY_c0deb66b153979}
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 29.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 29.png)
 
 # 链上转账助手
 
 1
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 30.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 30.png)
 
 flag{Tr4nsf3r_T0_c0nTracT_MaY_R3v3rt_feafb80208}
 
@@ -1359,7 +1359,7 @@ contract Malicious {
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 31.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 31.png)
 
 flag{Ple4se_L1m1t_y0uR_GAS_HaHa_9a6996f0ab}
 
@@ -1432,7 +1432,7 @@ int main() {
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 32.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 32.png)
 
 ```Plain Text
 #include <gio/gio.h>
@@ -1550,7 +1550,7 @@ int main() {
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 33.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 33.png)
 
 ```Plain Text
 #define _GNU_SOURCE
@@ -1618,7 +1618,7 @@ int main() {
 
 ```
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 34.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 34.png)
 
 
 
@@ -1626,7 +1626,7 @@ int main() {
 
 js逆向
 
-![image.png](HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 35.png)
+![image.png](./HackerGame2024+d7a78663-e26b-4866-b8d5-dfce1d0f52d7/image 35.png)
 
 
 
