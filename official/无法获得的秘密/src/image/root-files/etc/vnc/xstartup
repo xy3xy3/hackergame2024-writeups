@@ -1,0 +1,18 @@
+#!/bin/bash -e
+
+while [[ ! -S "/tmp/.X11-unix/X0" ]]; do
+    sleep 1
+done
+
+setfacl -m u:user:rw /tmp/.X11-unix/X0
+install -o user -g user -m 0600 -t ~user "${HOME}/.Xauthority"
+
+export HOME=~user
+export USER=user
+export SHELL=/bin/bash
+
+exec /usr/bin/setpriv --reuid=1000 --regid=1000 --init-groups --no-new-privs \
+    /usr/bin/setsid -w /bin/bash -l -e <<EOF
+vncconfig -nowin &
+startxfce4
+EOF

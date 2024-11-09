@@ -1,0 +1,4 @@
+venv/
+__pycache__/
+answers.json
+results.json

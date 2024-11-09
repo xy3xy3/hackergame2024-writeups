@@ -1,0 +1,18 @@
+version: '2.4'
+
+services:
+  challenge:
+    build:
+      context: ..
+      dockerfile: ./docker_for_everyone_2/Dockerfile
+    entrypoint: ["/bin/true"]
+  front:
+    extends:
+      file: ../../dynamic_flag/docker-compose.yml
+      service: front
+    depends_on:
+      - challenge
+  web:
+    extends:
+      file: ../../web_netcat/docker-compose.yml
+      service: web

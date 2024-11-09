@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <script type="text/javascript" src="/static/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+    <title>无法获得的秘密</title>
+  </head>
+  <body>
+    <div class="container px-3 pt-3">
+        <h1>无法获得的秘密</h1>
+        <div>
+            <form method="post" enctype="multipart/form-data" id="file-form">
+            <div class="form-group">
+                <label for="file" class="form-label">请上传获得的秘密文件：</label>
+                <input id="file1" type="file" name="file" class="form-control-file">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">上传</button>
+            </div>
+            </form>
+        </div>
+        <hr>
+        <p>提示：题目环境有效时间 15 分钟，断开连接后环境重置。</p>
+        <div id="novnc-container">
+          <iframe id="novnc-iframe" title="novnc" src="/static/noVNC/vnc.html" width="1024px" height="600px"></iframe>
+        </div>
+    </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="info-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Flag</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="info-toast-body">
+
+        </div>
+      </div>
+      <div id="error-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">错误</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="error-toast-body">
+          提交的秘密文件不正确
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="/static/js/index.js"></script>
+  </body>
+</html>

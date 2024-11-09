@@ -1,0 +1,24 @@
+/* 自定义容器类 */
+.form-container, .result-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+/* 上半表单部分 */
+.form-container {
+    background-color: #f2f2f2;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* 下半显示结果部分 */
+.result-container {
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+.pure-button {
+    margin-top: 10px;
+}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/main.css">
+    <title>PaoluGPT</title>
+  </head>
+  <body>
+    <div class="container px-3 pt-3">
+        <h1>PaoluGPT，为您提供最优质的大语言模型服务！</h1>
+        <a href="/list">查看聊天记录</a>
+        <a href="/chat">开始聊天</a>
+        <div class="container pt-3">
+        {% block content %}{% endblock %}
+        </div>
+    </div>
+  </body>
+</html>

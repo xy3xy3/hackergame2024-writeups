@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
+    <title>实验一评测榜单</title>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">实验一评测榜单</h1>
+
+      <form
+        action="{{ url_for('submit') }}"
+        method="POST"
+        enctype="multipart/form-data"
+        class="mb-5"
+      >
+        <div class="mb-3">
+          <label for="file" class="form-label">选择文件：</label>
+          <input type="file" class="form-control" name="file" id="file" />
+        </div>
+        <button type="submit" class="btn btn-primary">上传</button>
+      </form>
+
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="alert alert-info">
+        <ul class="mb-0">
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %} {% endwith %}
+
+      <h2 class="mb-4">Score</h2>
+      <ol class="list-group">
+        {% for score in results %}
+        <li class="list-group-item">第 {{ loop.index0+1 }} 名：{{ score }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+  </body>
+</html>

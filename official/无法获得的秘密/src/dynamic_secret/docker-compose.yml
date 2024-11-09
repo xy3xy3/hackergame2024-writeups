@@ -1,0 +1,32 @@
+version: '2.4'
+services:
+  front:
+    build: .
+    ports:
+      - ${port}:2333
+    restart: always
+    read_only: true
+    ipc: shareable
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      - hackergame_conn_interval=${conn_interval}
+      - hackergame_token_timeout=${token_timeout}
+      - hackergame_challenge_timeout=${challenge_timeout}
+      - hackergame_pids_limit=${pids_limit}
+      - hackergame_mem_limit=${mem_limit}
+      - hackergame_challenge_docker_name=${challenge_docker_name}
+      - hackergame_read_only=${read_only}
+      - hackergame_challenge_network=${challenge_network}
+      - hackergame_shm_exec=${shm_exec}
+      - hackergame_tmp_tmpfs=${tmp_tmpfs}
+      - hackergame_extra_flag=${extra_flag}
+      - hackergame_secret_key=${secret_key}
+      - hackergame_secret_size=${secret_size}
+      - hackergame_secret_path=${secret_path}
+      - TZ=Asia/Shanghai
+      - DOCKER_DEFAULT_PLATFORM=linux/amd64

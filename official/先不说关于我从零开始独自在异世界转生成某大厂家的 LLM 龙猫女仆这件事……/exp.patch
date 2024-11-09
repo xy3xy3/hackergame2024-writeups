@@ -1,0 +1,569 @@
+diff --git a/Makefile b/Makefile
+index 719f45d..2507ea9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1285,7 +1285,7 @@ llama-infill: examples/infill/infill.cpp \
+ llama-simple: examples/simple/simple.cpp \
+ 	$(OBJ_ALL)
+ 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
++	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS) -lcrypto
+
+ llama-tokenize: examples/tokenize/tokenize.cpp \
+ 	$(OBJ_ALL)
+diff --git a/common/sampling.h b/common/sampling.h
+index d37f25a..4296bec 100644
+--- a/common/sampling.h
++++ b/common/sampling.h
+@@ -81,3 +81,5 @@ std::string common_sampler_type_to_str(enum common_sampler_type cnstr);
+
+ std::vector<enum common_sampler_type> common_sampler_types_from_names(const std::vector<std::string> & names, bool allow_alt_names);
+ std::vector<enum common_sampler_type> common_sampler_types_from_chars(const std::string & chars);
++
++std::vector<std::pair<llama_token, float>> llama_sampler_sample_mult(struct llama_sampler * smpl, struct llama_context * ctx, int32_t idx);
+\ No newline at end of file
+diff --git a/examples/simple/simple.cpp b/examples/simple/simple.cpp
+index 59760fe..e95ab6c 100644
+--- a/examples/simple/simple.cpp
++++ b/examples/simple/simple.cpp
+@@ -1,24 +1,116 @@
+ #include "llama.h"
++#include "log.h"
++#include "sampling.h"
++
++#include <algorithm>
+ #include <cstdio>
+ #include <cstring>
++#include <fstream>
++#include <random>
++#include <streambuf>
+ #include <string>
+ #include <vector>
+
+-static void print_usage(int, char ** argv) {
++#include <openssl/sha.h>
++
++static void print_usage(int, char** argv)
++{
+     printf("\nexample usage:\n");
+     printf("\n    %s -m model.gguf [-n n_predict] [-ngl n_gpu_layers] [prompt]\n", argv[0]);
+     printf("\n");
+ }
+
+-int main(int argc, char ** argv) {
++std::string pattern_str("hackergame of ustc");
++llama_model* model = nullptr;
++const char* cur_pos = nullptr;
++void grammar_set_p(llama_token_data_array* cur_p)
++{
++    for (llama_token_data* data = cur_p->data; data != cur_p->data + cur_p->size; data++) {
++        if (cur_pos[0] == '\0') {
++            if (!llama_token_is_eog(model, data->id)) {
++                data->p = 0;
++            }
++            continue;
++        }
++        char buf[128];
++        int n = llama_token_to_piece(model, data->id, buf, sizeof(buf), 0, true);
++        if (n < 0) {
++            fprintf(stderr, "%s: error: failed to convert token to piece\n", __func__);
++        }
++        for (int i = 0; i < n; i++) {
++            if (pattern_str.find(buf[i]) != std::string::npos) {
++                if (*(cur_pos + i) != 'x') {
++                    data->p = 0;
++                    break;
++                }
++            } else {
++                if (*(cur_pos + i) != buf[i]) {
++                    data->p = 0;
++                    break;
++                }
++            }
++        }
++    }
++}
++
++std::vector<unsigned char> HexToBytes(const std::string& hex)
++{
++    std::vector<unsigned char> bytes;
++
++    for (unsigned int i = 0; i < hex.length(); i += 2) {
++        std::string byteString = hex.substr(i, 2);
++        unsigned char byte = (unsigned char)strtol(byteString.c_str(), NULL, 16);
++        bytes.push_back(byte);
++    }
++
++    return bytes;
++}
++
++bool write_output(std::vector<llama_token> tokens)
++{
++    std::ifstream hfile("before.sha256");
++    std::string hex((std::istreambuf_iterator<char>(hfile)),
++        std::istreambuf_iterator<char>());
++    std::vector<unsigned char> target = HexToBytes(hex);
++    FILE* outf = fopen("output.txt", "w");
++    std::string s;
++    for (auto& t : tokens) {
++        char buf[128];
++        int n = llama_token_to_piece(model, t, buf, sizeof(buf), 0, true);
++        if (n < 0) {
++            fprintf(stderr, "%s: error: failed to convert token to piece\n", __func__);
++            return false;
++        }
++        s += std::string(buf, n);
++    }
++    fwrite(s.c_str(), 1, s.length(), outf);
++    fclose(outf);
++
++    unsigned char hash[SHA256_DIGEST_LENGTH];
++    SHA256((const unsigned char*)s.c_str(), s.length(), hash);
++    return memcmp(hash, target.data(), SHA256_DIGEST_LENGTH) == 0;
++}
++
++typedef struct Node {
++    std::vector<llama_token> tokens;
++    const char* pos;
++    struct Node* parent;
++    std::vector<struct Node*> children;
++    int n;
++    float p;
++} Node;
++
++int main(int argc, char** argv)
++{
++    std::ifstream mfile("after.txt");
++    std::string masked_str((std::istreambuf_iterator<char>(mfile)),
++        std::istreambuf_iterator<char>());
+     // path to the model gguf file
+     std::string model_path;
+-    // prompt to generate text from
+-    std::string prompt = "Hello my name is";
+     // number of layers to offload to the GPU
+     int ngl = 99;
+     // number of tokens to predict
+-    int n_predict = 32;
++    int n_predict = 1024;
+
+     // parse command line arguments
+
+@@ -65,63 +157,81 @@ int main(int argc, char ** argv) {
+             print_usage(argc, argv);
+             return 1;
+         }
+-        if (i < argc) {
+-            prompt = argv[i++];
+-            for (; i < argc; i++) {
+-                prompt += " ";
+-                prompt += argv[i];
+-            }
+-        }
+     }
+
+     // initialize the model
+-
++    common_init();
+     llama_model_params model_params = llama_model_default_params();
+     model_params.n_gpu_layers = ngl;
+
+-    llama_model * model = llama_load_model_from_file(model_path.c_str(), model_params);
++    model = llama_load_model_from_file(model_path.c_str(), model_params);
+
+     if (model == NULL) {
+-        fprintf(stderr , "%s: error: unable to load model\n" , __func__);
++        fprintf(stderr, "%s: error: unable to load model\n", __func__);
+         return 1;
+     }
+
+     // tokenize the prompt
+
++    // prompt to generate text from
++    std::string sprompt = "<|im_start|>system\nYou are a professional CTF player.<|im_end|>\n";
++    std::string uprompt = "<|im_start|>user\nWrite a short article for Hackergame 2024 (中国科学技术大学 (University of Science and Technology of China) 第十一届信息安全大赛) in English. The more funny and unreal the better. About 500 words.<|im_end|>\n<|im_start|>assistant\n";
+     // find the number of tokens in the prompt
+-    const int n_prompt = -llama_tokenize(model, prompt.c_str(), prompt.size(), NULL, 0, true, true);
+-
+-    // allocate space for the tokens and tokenize the prompt
+-    std::vector<llama_token> prompt_tokens(n_prompt);
+-    if (llama_tokenize(model, prompt.c_str(), prompt.size(), prompt_tokens.data(), prompt_tokens.size(), true, true) < 0) {
++    int n_prompt = -llama_tokenize(model, sprompt.c_str(), sprompt.size(), NULL, 0, true, true);
++    std::vector<llama_token> sprompt_tokens(n_prompt);
++    if (llama_tokenize(model, sprompt.c_str(), sprompt.size(), sprompt_tokens.data(), sprompt_tokens.size(), true, true) < 0) {
+         fprintf(stderr, "%s: error: failed to tokenize the prompt\n", __func__);
+         return 1;
+     }
+-
++    n_prompt = -llama_tokenize(model, uprompt.c_str(), uprompt.size(), NULL, 0, true, true);
++    std::vector<llama_token> uprompt_tokens(n_prompt);
++    if (llama_tokenize(model, uprompt.c_str(), uprompt.size(), uprompt_tokens.data(), uprompt_tokens.size(), true, true) < 0) {
++        fprintf(stderr, "%s: error: failed to tokenize the prompt\n", __func__);
++        return 1;
++    }
++    std::vector<llama_token> prompt_tokens = sprompt_tokens;
++    prompt_tokens.insert(prompt_tokens.end(), uprompt_tokens.begin(), uprompt_tokens.end());
+     // initialize the context
+
+     llama_context_params ctx_params = llama_context_default_params();
+     // n_ctx is the context size
+     ctx_params.n_ctx = n_prompt + n_predict - 1;
+     // n_batch is the maximum number of tokens that can be processed in a single call to llama_decode
+-    ctx_params.n_batch = n_prompt;
+-    // enable performance counters
+-    ctx_params.no_perf = false;
+-
+-    llama_context * ctx = llama_new_context_with_model(model, ctx_params);
+-
+-    if (ctx == NULL) {
+-        fprintf(stderr , "%s: error: failed to create the llama_context\n" , __func__);
+-        return 1;
+-    }
++    ctx_params.n_batch = 2048;
++    ctx_params.no_perf = true;
++    ctx_params.n_threads = 10;
++    ctx_params.n_threads_batch = ctx_params.n_threads;
+
+     // initialize the sampler
+
+     auto sparams = llama_sampler_chain_default_params();
+     sparams.no_perf = false;
+-    llama_sampler * smpl = llama_sampler_chain_init(sparams);
+-
+-    llama_sampler_chain_add(smpl, llama_sampler_init_greedy());
++    llama_sampler* smpl = llama_sampler_chain_init(sparams);
++
++    common_sampler_params params;
++    // params.seed = 3954386999;
++    params.min_keep = 1;
++    params.penalize_nl = true;
++
++    llama_sampler_chain_add(smpl,
++        llama_sampler_init_penalties(
++            llama_n_vocab(model),
++            llama_token_eos(model),
++            llama_token_nl(model),
++            params.penalty_last_n,
++            params.penalty_repeat,
++            params.penalty_freq,
++            params.penalty_present,
++            params.penalize_nl,
++            params.ignore_eos));
++    llama_sampler_chain_add(smpl, llama_sampler_init_top_k(params.top_k));
++    llama_sampler_chain_add(smpl, llama_sampler_init_tail_free(params.tfs_z, params.min_keep));
++    llama_sampler_chain_add(smpl, llama_sampler_init_typical(params.typ_p, params.min_keep));
++    llama_sampler_chain_add(smpl, llama_sampler_init_top_p(params.top_p, params.min_keep));
++    llama_sampler_chain_add(smpl, llama_sampler_init_min_p(params.min_p, params.min_keep));
++    llama_sampler_chain_add(smpl, llama_sampler_init_temp_ext(params.temp, params.dynatemp_range, params.dynatemp_exponent));
++    llama_sampler_chain_add(smpl, llama_sampler_init_softmax());
++    llama_sampler_chain_add(smpl, llama_sampler_init_dist_grammar(params.seed, grammar_set_p));
+
+     // print the prompt token-by-token
+
+@@ -134,33 +244,41 @@ int main(int argc, char ** argv) {
+         }
+         std::string s(buf, n);
+         printf("%s", s.c_str());
++        printf("|");
+     }
+-
+     // prepare a batch for the prompt
+
+-    llama_batch batch = llama_batch_get_one(prompt_tokens.data(), prompt_tokens.size());
+-
++    common_log_set_verbosity_thold(-1);
+     // main loop
+
+     const auto t_main_start = ggml_time_us();
+     int n_decode = 0;
+-    llama_token new_token_id;
+-
+-    for (int n_pos = 0; n_pos + batch.n_tokens < n_prompt + n_predict; ) {
++    std::vector<std::pair<llama_token, float>> new_tokens;
++    Node root = { .tokens = prompt_tokens, .pos = masked_str.c_str(), .parent = nullptr, .children = std::vector<Node*>(), .n = 1, .p = 1.0 };
++    Node* curr_node = &root;
++
++    while (1) {
++        llama_batch batch = llama_batch_get_one(curr_node->tokens.data(), curr_node->tokens.size());
++        llama_context* ctx = llama_new_context_with_model(model, ctx_params);
++        if (ctx == NULL) {
++            fprintf(stderr, "%s: error: failed to create the llama_context\n", __func__);
++            return 1;
++        }
+         // evaluate the current batch with the transformer model
+         if (llama_decode(ctx, batch)) {
+             fprintf(stderr, "%s : failed to eval, return code %d\n", __func__, 1);
+             return 1;
+         }
+
+-        n_pos += batch.n_tokens;
+-
+-        // sample the next token
+-        {
+-            new_token_id = llama_sampler_sample(smpl, ctx, -1);
+-
++        cur_pos = curr_node->pos;
++        new_tokens = llama_sampler_sample_mult(smpl, ctx, -1);
++        bool bt_flag = false;
++        while (new_tokens.size() == 1) {
++            llama_token new_token_id = new_tokens[0].first;
+             // is it an end of generation?
+             if (llama_token_is_eog(model, new_token_id)) {
++                printf("\nFound EOG\n");
++                bt_flag = true;
+                 break;
+             }
+
+@@ -171,14 +289,106 @@ int main(int argc, char ** argv) {
+                 return 1;
+             }
+             std::string s(buf, n);
+-            printf("%s", s.c_str());
++            std::string sm(cur_pos, n);
++            printf("|");
++            printf("%s(%s)", s.c_str(), sm.c_str());
+             fflush(stdout);
++            n_decode += 1;
++
++            curr_node->pos += n;
++            curr_node->tokens.push_back(new_token_id);
+
+             // prepare the next batch with the sampled token
+             batch = llama_batch_get_one(&new_token_id, 1);
++            if (llama_decode(ctx, batch)) {
++                fprintf(stderr, "%s : failed to eval, return code %d\n", __func__, 1);
++                return 1;
++            }
++            cur_pos = curr_node->pos;
++            new_tokens = llama_sampler_sample_mult(smpl, ctx, -1);
++        }
++        if (new_tokens.size() > 1) {
++            printf("[");
++            for (std::pair<llama_token, float> token_pair : new_tokens) {
++                // is it an end of generation?
++                llama_token new_token_id = token_pair.first;
++                if (llama_token_is_eog(model, new_token_id)) {
++                    printf("\nFound multiple EOG\n");
++                    bt_flag = true;
++                    break;
++                }
+
+-            n_decode += 1;
++                char buf[128];
++                int n = llama_token_to_piece(model, new_token_id, buf, sizeof(buf), 0, true);
++                if (n < 0) {
++                    fprintf(stderr, "%s: error: failed to convert token to piece\n", __func__);
++                    return 1;
++                }
++                std::string s(buf, n);
++                std::string sm(cur_pos, n);
++                printf("|");
++                printf("%s(%s)", s.c_str(), sm.c_str());
++                fflush(stdout);
++
++                n_decode += 1;
++                Node* child = new Node;
++                child->tokens = curr_node->tokens;
++                child->tokens.push_back(new_token_id);
++                child->pos = curr_node->pos + n;
++                child->parent = curr_node;
++                child->n = 0;
++                child->p = token_pair.second;
++                curr_node->children.push_back(child);
++            }
++            printf("]");
++            fflush(stdout);
++            if (!bt_flag) {
++                curr_node = curr_node->children[0];
++                curr_node->n += 1;
++            }
++        }
++        if (bt_flag || new_tokens.size() == 0) {
++            printf("\n--- MCTS Rollout Finished ---\n");
++            if (write_output(std::vector<llama_token>(curr_node->tokens.begin() + prompt_tokens.size(), curr_node->tokens.end()))) {
++                printf("\nFound target\n");
++                llama_free(ctx);
++                break;
++            }
++            if (curr_node->parent == nullptr) {
++                fprintf(stderr, "MCTS failed\n");
++                return -1;
++            }
++            Node* parent = curr_node->parent;
++            parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), curr_node), parent->children.end());
++            fflush(stdout);
++            delete curr_node;
++            while (parent->children.size() == 0) {
++                curr_node = parent;
++                if (curr_node->parent == nullptr) {
++                    fprintf(stderr, "MCTS failed\n");
++                    return -1;
++                }
++                parent = curr_node->parent;
++                parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), curr_node), parent->children.end());
++                delete curr_node;
++            }
++            curr_node = &root;
++            curr_node->n += 1;
++            while (curr_node->children.size()) {
++                int index = 0;
++                float max = -INFINITY;
++                for (int i = 0; i < curr_node->children.size(); i++) {
++                    float value = curr_node->children[i]->p + 0.5 * sqrt(2 * log(curr_node->n) / (curr_node->children[i]->n + 1));
++                    if (value > max) {
++                        max = value;
++                        index = i;
++                    }
++                }
++                curr_node = curr_node->children[index];
++                curr_node->n += 1;
++            }
+         }
++        llama_free(ctx);
+     }
+
+     printf("\n");
+@@ -186,15 +396,14 @@ int main(int argc, char ** argv) {
+     const auto t_main_end = ggml_time_us();
+
+     fprintf(stderr, "%s: decoded %d tokens in %.2f s, speed: %.2f t/s\n",
+-            __func__, n_decode, (t_main_end - t_main_start) / 1000000.0f, n_decode / ((t_main_end - t_main_start) / 1000000.0f));
++        __func__, n_decode, (t_main_end - t_main_start) / 1000000.0f, n_decode / ((t_main_end - t_main_start) / 1000000.0f));
+
+     fprintf(stderr, "\n");
+     llama_perf_sampler_print(smpl);
+-    llama_perf_context_print(ctx);
++    // llama_perf_context_print(ctx);
+     fprintf(stderr, "\n");
+
+     llama_sampler_free(smpl);
+-    llama_free(ctx);
+     llama_free_model(model);
+
+     return 0;
+diff --git a/include/llama.h b/include/llama.h
+index d4059c8..e35585f 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -1073,6 +1073,8 @@ extern "C" {
+     LLAMA_API struct llama_sampler * llama_sampler_init_greedy(void);
+     LLAMA_API struct llama_sampler * llama_sampler_init_dist  (uint32_t seed);
+
++    LLAMA_API struct llama_sampler * llama_sampler_init_dist_grammar(uint32_t seed, void (*f)(llama_token_data_array *arr));
++
+     /// @details Sorts candidate tokens by their logits in descending order and calculate probabilities based on logits.
+     /// NOTE: Avoid using on the full vocabulary as the sorting can become slow. For example, apply top-k or top-p sampling first.
+     DEPRECATED(LLAMA_API struct llama_sampler * llama_sampler_init_softmax    (void),
+diff --git a/src/llama-sampling.cpp b/src/llama-sampling.cpp
+index d715161..bb4228e 100644
+--- a/src/llama-sampling.cpp
++++ b/src/llama-sampling.cpp
+@@ -285,6 +285,38 @@ llama_token llama_sampler_sample(struct llama_sampler * smpl, struct llama_conte
+     return token;
+ }
+
++std::vector<std::pair<llama_token, float>> llama_sampler_sample_mult(struct llama_sampler* smpl, struct llama_context* ctx, int32_t idx)
++{
++    const auto* logits = llama_get_logits_ith(ctx, idx);
++
++    const int n_vocab = llama_n_vocab(llama_get_model(ctx));
++
++    // TODO: do not allocate each time
++    std::vector<llama_token_data> cur;
++    cur.reserve(n_vocab);
++    for (llama_token token_id = 0; token_id < n_vocab; token_id++) {
++        cur.emplace_back(llama_token_data { token_id, logits[token_id], 0.0f });
++    }
++
++    llama_token_data_array cur_p = {
++        /* .data       = */ cur.data(),
++        /* .size       = */ cur.size(),
++        /* .selected   = */ -1,
++        /* .sorted     = */ false,
++    };
++
++    llama_sampler_apply(smpl, &cur_p);
++
++    std::vector<std::pair<llama_token, float>> result;
++    for (size_t i = 0; i < cur_p.size; ++i) {
++        if (cur_p.data[i].p > 0) {
++            result.push_back(std::pair<llama_token, float>(cur_p.data[i].id, cur_p.data[i].p));
++        }
++    }
++
++    return result;
++}
++
+ // sampler chain
+
+ static const char * llama_sampler_chain_name(const struct llama_sampler * /*smpl*/) {
+@@ -502,6 +534,70 @@ struct llama_sampler * llama_sampler_init_dist(uint32_t seed) {
+     };
+ }
+
++// dist_grammar
++
++struct llama_sampler_dist_grammar {
++    const uint32_t seed;
++    uint32_t seed_cur;
++
++    std::mt19937 rng;
++    void (*grammar_set_p)(llama_token_data_array* cur_p);
++};
++
++static const char* llama_sampler_dist_grammar_name(const struct llama_sampler* /*smpl*/)
++{
++    return "dist_grammar";
++}
++
++static void llama_sampler_dist_grammar_apply(struct llama_sampler* smpl, llama_token_data_array* cur_p)
++{
++    auto* ctx = (llama_sampler_dist_grammar*)smpl->ctx;
++    ctx->grammar_set_p(cur_p);
++    float sump = 0;
++    for (llama_token_data* data = cur_p->data; data < cur_p->data + cur_p->size; ++data) {
++        sump += data->p;
++    }
++    if (sump == 0) {
++        return;
++    }
++    cur_p->selected = llama_sample_dist(cur_p, ctx->rng);
++}
++
++static void llama_sampler_dist_grammar_reset(struct llama_sampler* smpl)
++{
++    auto* ctx = (llama_sampler_dist_grammar*)smpl->ctx;
++    ctx->seed_cur = get_rng_seed(ctx->seed);
++    ctx->rng.seed(ctx->seed_cur);
++}
++
++static void llama_sampler_dist_grammar_free(struct llama_sampler* smpl)
++{
++    delete (llama_sampler_dist_grammar*)smpl->ctx;
++}
++
++static struct llama_sampler_i llama_sampler_dist_grammar_i = {
++    /* .name   = */ llama_sampler_dist_grammar_name,
++    /* .accept = */ nullptr,
++    /* .apply  = */ llama_sampler_dist_grammar_apply,
++    /* .reset  = */ llama_sampler_dist_grammar_reset,
++    /* .clone  = */ nullptr,
++    /* .free   = */ llama_sampler_dist_grammar_free,
++};
++
++struct llama_sampler* llama_sampler_init_dist_grammar(uint32_t seed, void (*grammar_set_p)(llama_token_data_array* cur_p))
++{
++    auto seed_cur = get_rng_seed(seed);
++    return new llama_sampler {
++        /* .iface = */ &llama_sampler_dist_grammar_i,
++        /* .ctx   = */ new llama_sampler_dist_grammar {
++            /* .seed     = */ seed,
++            /* .seed_cur = */ seed_cur,
++            /* .rng      = */ std::mt19937(seed_cur),
++            /* .grammar_set_p = */ grammar_set_p,
++        },
++    };
++}
++
+ // softmax
+
+ static const char * llama_sampler_softmax_name(const struct llama_sampler * /*smpl*/) {

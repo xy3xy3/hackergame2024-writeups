@@ -1,0 +1,112 @@
+( uxncli encer.rom key )
+|10 @Console &vector $2 &read $5 &type $1 &write $1 &error $1
+
+|0000
+
+@key $30
+@state $24
+@ctr $1
+@bct $1
+
+|0100
+
+@on-reset ( -> )
+	;on-argument .Console/vector DEO2
+	.Console/type DEI ?{ ;on-stdin .Console/vector DEO2 }
+	BRK
+
+@on-argument ( -> )
+	.Console/type DEI #04 NEQ ?{ ;on-stdin .Console/vector DEO2 BRK }
+	.Console/read DEI LIT &sp ff INC ,&sp STRk POP STZ
+	BRK
+
+@on-stdin ( -> )
+	.Console/type DEI #04 EQU ?finalize
+	.Console/read DEI 
+	LIT &cnt 00 DUP INC ,&cnt STR #ff GTH POP #01 ?{ POP BRK }
+	DUP #7d NEQ POP #01 ?{ BRK }
+	<core>
+	BRK
+
+%mod ( lo ro -- res ) {
+	 DIVk MUL SUB
+}
+
+%debug ( -- ) {
+	#010e DEO
+}
+
+@finalize ( -- | won't matter if I don't call DEO or other functions)
+	#800f DEO
+	BRK
+	
+@zip ( -- )
+	.state #00
+	( st8* merged )
+	&l
+	OVR LDZ ORA SWP INC SWP
+	( newst merged )
+	OVR #06 mod ?{ putchar #00 }
+	#10 SFT
+	OVR #48 NEQ ?&l
+	.ctr LDZk #17 MUL #18 mod SWP STZ
+	POP2
+	JMP2r
+
+@putchar ( byte -- )
+	#30 ADD hexify
+	JMP2r
+
+@<core> ( byte -- )
+	.ctr LDZ2
+	( byte ctr bct )
+	&l
+	STH DUP2 #011f AND2
+	( byte ctr lowbit ctr )
+	.state ADD
+	( byte ctr lowbit zpos )
+	STZ
+	#00 SWP
+	#000d MUL2 #0007 ADD2 #0018 DIV2k MUL2 SUB2 NIP SWP #01 SFT SWP
+	STHr INC
+	( byte ctr bct )
+	DUP #07 AND ?&l
+	DUP #18 mod .bct STZ
+	#18 NEQ ?{ zip }
+	.ctr STZ
+	POP
+	JMP2r
+
+@test "zipping 0a 00
+	
+@vig ( blob -- )
+	LIT &cnt 00 LDZk DUP ?{ POP2 #00 LDZk } SWP INC ,&cnt STR
+	ADD #0f AND #61 ADD .Console/write DEO
+	JMP2r
+
+@hexify ( byte -- | This should be the generator for statistical characteristics )
+	DUP #04 SFT vig #0f AND vig
+	JMP2r
+
+@dump ( pos16* -- )
+	&l
+	LDAk DUP ?{ POP POP2 JMP2r }
+	pc
+	INC2 !&l
+	
+@pc	( byte -- )
+	DUP #04 SFT #00 SWP ;mime ADD2 LDA .Console/write DEO
+	#0f AND #00 SWP ;mime ADD2 LDA .Console/write DEO
+	JMP2r
+
+@print-str ( b16* -- )
+	LDAk
+	&l
+	.Console/write DEO
+	INC2 LDAk DUP
+	?&l
+	POP POP2
+	JMP2r
+	
+@mime
+	"abcdefghijklmnop

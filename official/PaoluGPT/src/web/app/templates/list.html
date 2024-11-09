@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>聊天记录列表</h2>
+<ul>
+{% for message in messages %}
+<li><a href="/view?conversation_id={{ message.id }}">{{ message.title }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

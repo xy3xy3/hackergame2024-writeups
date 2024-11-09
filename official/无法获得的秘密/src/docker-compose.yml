@@ -1,0 +1,41 @@
+version: '2.4'
+services:
+  challenge:
+    build:
+      context: ./image
+    entrypoint: ["/bin/true"]
+  front:
+    extends:
+      file: ./dynamic_secret/docker-compose.yml
+      service: front
+    networks:
+      - backend
+    depends_on:
+      - challenge
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - ${web_port}:8000
+    environment:
+      - hackergame_flag_rule=${flag_rule}
+      - hackergame_secret_key=${secret_key}
+      - hackergame_secret_size=${secret_size}
+      - hackergame_nc_host=${nc_host}
+      - hackergame_nc_port=${nc_port}
+    restart: always
+    networks:
+      - backend
+      - default
+    mem_limit: 16g
+    memswap_limit: 16g
+    pids_limit: 128
+    cpus: 2
+    cap_drop:
+      - ALL
+    read_only: true
+
+networks:
+  backend:
+    internal: true

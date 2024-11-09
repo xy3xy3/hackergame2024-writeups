@@ -1,0 +1,54 @@
+( uxncli alterb64enc.rom )
+|10 @Console &vector $2 &read $5 &type $1 &write $1 &error $1
+
+|0000
+
+@queue $1
+@bitmask $1
+@anti-cheat $1
+
+|0100
+
+@on-reset ( -> )
+	#3f .bitmask STZ
+	;on-console .Console/vector DEO2
+	BRK
+
+@on-console ( -> )
+	.Console/type DEI #04 EQU ?finalize
+	.Console/read DEI <core>
+	BRK
+
+@<core> ( byte -- )
+	( byte bitmask lowpart )
+	.bitmask LDZ DUP2 AND
+	( byte bitmask )
+	.queue LDZ ORA putchar
+	( nqueue bitmask )
+	STHk #ff EOR AND #02 SFT STHr
+	( nqueue newbm | )
+	#02 SFT DUP ?{ SWP putchar #3f }
+	( nqueue newbm -- )
+	.queue STZ2
+	JMP2r
+
+@putchar ( byte -- )
+	#031d ROT MUL ADD #3f AND
+	.anti-cheat LDZk DUP INC ROT STZ ADD #3f AND
+	#00 SWP ;mime ADD2 LDA
+	#e439 ROT MUL ADD
+	.Console/write DEO
+	JMP2r
+	
+@finalize ( -- )
+	.queue LDZ2
+	( queue bitmask )
+	DUP #3f NEQ ?{ POP2 BRK }
+	SWP putchar
+	&loop
+	#3d18 DEO #02 SFT
+	?&loop
+	POP BRK
+
+@mime
+45 4e 57 60 69 72 7b 84 8d 96 9f a8 b1 ba c3 cc d5 de e7 f0 f9 02 0b 14 1d 26 65 6e 77 80 89 92 9b a4 ad b6 bf c8 d1 da e3 ec f5 fe 07 10 19 22 2b 34 3d 46 ac b5 be c7 d0 d9 e2 eb f4 fd 7f a3

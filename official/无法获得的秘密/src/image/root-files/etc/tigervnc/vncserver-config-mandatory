@@ -1,0 +1,5 @@
+$AcceptCutText=0;
+$SendCutText=0;
+$SendPrimary=0;
+$AcceptSetDesktopSize=0;
+$AllowOverride=0;

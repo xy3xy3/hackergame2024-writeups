@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+  <title>比大小王</title>
+  <script src="static/jquery.min.js"></script>
+  <script src="static/bootstrap/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/normalize.css">
+  <style>
+    .answer-button {
+      background-color: #ddf;
+    }
+    .answer-button:active, .answer-button.active {
+      background-color: #8af;
+    }
+  </style>
+</head>
+
+<body ontouchstart="" style="min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; background-image: url('/bg.png'); background-size: 1600px; touch-action: none">
+  <div style="flex: 0 1 450px; display: flex; flex-direction: column; justify-content: center; gap: 30px">
+    <h1 style="margin: 0; text-align: center">
+      比谁快
+    </h1>
+
+    <div style="display: flex; align-items: center">
+      <div style="flex: 1 1 130px; display: flex; flex-direction: column; text-align: left">
+        <div style="margin: 0 2px">
+          我：<span id="score1">0</span>/100 题
+        </div>
+        <div style="height: 20px; padding: 2px; display: flex; border: 2px solid #38d; border-radius: 4px; background-color: #127">
+          <div id="progress1" style="height: 100%; width: 0; border-radius: 2px; background-color: #5ee; transition: width 0.2s"></div>
+        </div>
+        <div style="margin: 0 2px">
+          时间：<span id="time1">00:00.000</span>
+        </div>
+      </div>
+      <div style="flex: 1 1 50px; font-size: 30px; text-align: center">
+        VS
+      </div>
+      <div style="flex: 1 1 130px; display: flex; flex-direction: column; text-align: right">
+        <div style="margin: 0 2px">
+          对手：<span id="score2">0</span>/100 题
+        </div>
+        <div style="height: 20px; padding: 2px; display: flex; justify-content: flex-end; border: 2px solid #38d; border-radius: 4px; background-color: #127">
+          <div id="progress2" style="height: 100%; width: 0; border-radius: 2px; background-color: #ed7; transition: width 0.1s"></div>
+        </div>
+        <div style="margin: 0 2px">
+          时间：<span id="time2">00:00.000</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 150px; display: flex; justify-content: center; align-items: center; border: 5px solid #38d; border-radius: 20px; background-color: #ddf; font-size: 40px">
+      <div id="value1" style="width: 80px; text-align: center"></div>
+      <div id="answer" style="height: 80px; width: 80px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background-color: #fff">
+        ?
+      </div>
+      <div id="value2" style="width: 80px; text-align: center"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-evenly">
+      <button type="button" id="less-than" class="answer-button" style="height: 100px; width: 100px; display: flex; justify-content: center; align-items: center; border: 5px solid #38d; border-radius: 20px; font-size: 40px; color: #000">
+        &lt;
+      </button>
+      <button type="button" id="greater-than" class="answer-button" style="height: 100px; width: 100px; display: flex; justify-content: center; align-items: center; border: 5px solid #38d; border-radius: 20px; font-size: 40px; color: #000">
+        &gt;
+      </button>
+    </div>
+    <p style="margin: 0; text-align: center">
+      （也可以使用键盘上的左/右方向键或 A/D 键）
+    </p>
+    <div id="dialog" style="position: absolute; height: 200px; width: 95vw; max-width: 500px; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; border: 5px solid #fb9; border-radius: 20px; background-color: #fec; font-size: 24px">
+      本场 PK 目标：比谁快
+    </div>
+  </div>
+
+  <script>
+    let state = {
+      allowInput: false,
+      score1: 0,
+      score2: 0,
+      values: null,
+      startTime: null,
+      value1: null,
+      value2: null,
+      inputs: [],
+      stopUpdate: false,
+    };
+
+    function loadGame() {
+      fetch('/game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+        .then(response => response.json())
+        .then(data => {
+          state.values = data.values;
+          state.startTime = data.startTime * 1000;
+          state.value1 = data.values[0][0];
+          state.value2 = data.values[0][1];
+          document.getElementById('value1').textContent = state.value1;
+          document.getElementById('value2').textContent = state.value2;
+          updateCountdown();
+        })
+        .catch(error => {
+          document.getElementById('dialog').textContent = '加载失败，请刷新页面重试';
+        });
+    }
+
+    function updateCountdown() {
+      if (state.stopUpdate) {
+        return;
+      }
+      const seconds = Math.ceil((state.startTime - Date.now()) / 1000);
+      if (seconds >= 4) {
+        requestAnimationFrame(updateCountdown);
+      }
+      if (seconds <= 3 && seconds >= 1) {
+        document.getElementById('dialog').textContent = seconds;
+        requestAnimationFrame(updateCountdown);
+      } else if (seconds <= 0) {
+        document.getElementById('dialog').style.display = 'none';
+        state.allowInput = true;
+        updateTimer();
+      }
+    }
+
+    function updateTimer() {
+      if (state.stopUpdate) {
+        return;
+      }
+      const time1 = Date.now() - state.startTime;
+      const time2 = Math.min(10000, time1);
+      state.score2 = Math.max(0, Math.floor(time2 / 100));
+      document.getElementById('time1').textContent = `${String(Math.floor(time1 / 60000)).padStart(2, '0')}:${String(Math.floor(time1 / 1000) % 60).padStart(2, '0')}.${String(time1 % 1000).padStart(3, '0')}`;
+      document.getElementById('time2').textContent = `${String(Math.floor(time2 / 60000)).padStart(2, '0')}:${String(Math.floor(time2 / 1000) % 60).padStart(2, '0')}.${String(time2 % 1000).padStart(3, '0')}`;
+      document.getElementById('score2').textContent = state.score2;
+      document.getElementById('progress2').style.width = `${state.score2}%`;
+      if (state.score2 === 100) {
+        state.allowInput = false;
+        state.stopUpdate = true;
+        document.getElementById('dialog').textContent = '对手已完成，挑战失败！';
+        document.getElementById('dialog').style.display = 'flex';
+        document.getElementById('time1').textContent = `00:10.000`;
+      } else {
+        requestAnimationFrame(updateTimer);
+      }
+    }
+
+    function chooseAnswer(choice) {
+      if (!state.allowInput) {
+        return;
+      }
+      state.inputs.push(choice);
+      let correct;
+      if (state.value1 < state.value2 && choice === '<' || state.value1 > state.value2 && choice === '>') {
+        correct = true;
+        state.score1++;
+        document.getElementById('answer').style.backgroundColor = '#5e5';
+      } else {
+        correct = false;
+        document.getElementById('answer').style.backgroundColor = '#e55';
+      }
+      document.getElementById('answer').textContent = choice;
+      document.getElementById('score1').textContent = state.score1;
+      document.getElementById('progress1').style.width = `${state.score1}%`;
+      state.allowInput = false;
+      setTimeout(() => {
+        if (state.score1 === 100) {
+          submit(state.inputs);
+        } else if (correct) {
+          state.value1 = state.values[state.score1][0];
+          state.value2 = state.values[state.score1][1];
+          state.allowInput = true;
+          document.getElementById('value1').textContent = state.value1;
+          document.getElementById('value2').textContent = state.value2;
+          document.getElementById('answer').textContent = '?';
+          document.getElementById('answer').style.backgroundColor = '#fff';
+        } else {
+          state.allowInput = false;
+          state.stopUpdate = true;
+          document.getElementById('dialog').textContent = '你选错了，挑战失败！';
+          document.getElementById('dialog').style.display = 'flex';
+        }
+      }, 200);
+    }
+
+    function submit(inputs) {
+      fetch('/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({inputs}),
+      })
+        .then(response => response.json())
+        .then(data => {
+          state.stopUpdate = true;
+          document.getElementById('dialog').textContent = data.message;
+          document.getElementById('dialog').style.display = 'flex';
+        })
+        .catch(error => {
+          state.stopUpdate = true;
+          document.getElementById('dialog').textContent = '提交失败，请刷新页面重试';
+          document.getElementById('dialog').style.display = 'flex';
+        });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        document.getElementById('less-than').classList.add('active');
+        setTimeout(() => document.getElementById('less-than').classList.remove('active'), 200);
+        chooseAnswer('<');
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        document.getElementById('greater-than').classList.add('active');
+        setTimeout(() => document.getElementById('greater-than').classList.remove('active'), 200);
+        chooseAnswer('>');
+      }
+    });
+    document.getElementById('less-than').addEventListener('click', () => chooseAnswer('<'));
+    document.getElementById('greater-than').addEventListener('click', () => chooseAnswer('>'));
+    document.addEventListener('load', loadGame());
+  </script>
+</body>
+
+</html>

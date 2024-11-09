@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <title>动画分享</title>
+  </head>
+  <body>
+    <div class="container px-3 pt-3">
+        <h1>动画分享</h1>
+        <div>
+            <form method=post enctype=multipart/form-data>
+            <div class="mb-3">
+                <label for="file" class="form-label">选择文件以执行。可以是带有 shebang 的脚本或二进制程序。</label>
+                <input id="file" type="file" name="file" class="form-control-file">
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">上传运行</button>
+                <small id="help" class="form-text">
+                  总上传大小需小于 10 MB。
+                </small>
+            </div>
+            </form>
+        </div>
+        <hr>
+        <div>
+            <h3>运行结果</h3>
+            <pre>{{ result }}</pre>
+        </div>
+    </div>
+  </body>
+</html>
